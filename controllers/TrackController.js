@@ -1,6 +1,6 @@
 const TrackModel = require('../models/Track')
 const ArtistModel = require('../models/Artist')
-const { Op, literal } = require('sequelize')
+const ObjectId = require('mongoose').Types.ObjectId;
 
 class TrackController {
     async create(req, res) {
@@ -181,15 +181,30 @@ class TrackController {
     async remove(req, res) {
         try {
             const trackId = req.params.id
+            const track = await TrackModel.findOne({ _id: trackId })
+            const trackArtists = track.artist
+            
+            for (const trackArtist of trackArtists) {
+                const artist = await ArtistModel.findOne({ _id: trackArtist.artistId })
+                const filteredArtistTracks = artist.tracks.filter(e => e.toString() !== trackId)
+                await ArtistModel.updateOne(
+                    {
+                        _id: trackArtist.artistId
+                    },
+                    {
+                        tracks: filteredArtistTracks
+                    }
+                )
+            }
 
-            await TrackModel.findOneAndDelete({ _id: trackId })
+            await TrackModel.deleteOne({ _id: trackId })
 
             res.json({
                 success: true,
             })
 
         } catch (err) {
-
+            console.log(err)
         }
     }
 }
