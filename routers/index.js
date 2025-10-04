@@ -21,7 +21,7 @@ router.patch('/auth/:id', UserController.update)
 
 router.post('/upload', upload.single('image'), (req, res) => {
     res.json({
-        url: `/tmp/uploads/${req.file.originalname}`
+        url: `/uploads/${req.file.originalname}`
     })
 })
 
