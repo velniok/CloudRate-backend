@@ -20,9 +20,13 @@ router.get('/auth/:id', UserController.getUser)
 router.patch('/auth/:id', UserController.update)
 
 router.post('/upload', upload.single('image'), (req, res) => {
-    res.json({
-        url: `/uploads/${req.file.originalname}`
-    })
+    try {
+        res.json({
+            url: `/uploads/${req.file.originalname}`
+        })
+    } catch (err) {
+        console.log(err)
+    }
 })
 
 router.post('/artist', checkAdminMiddleware, artistValidation.artistCreateValidation, ArtistController.create)
