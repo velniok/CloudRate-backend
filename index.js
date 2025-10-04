@@ -12,9 +12,9 @@ app.use('/files', express.static('./uploads'))
 // app.use('/uploads', express.static('uploads'))
 app.use(cors())
 
-if (!fs.existsSync('/workspace/uploads')) {
-    fs.mkdirSync('/workspace/uploads', { recursive: true })
-    console.log('Created uploads directory: /workspace/uploads')
+if (!fs.existsSync('./uploads')) {
+    fs.mkdirSync('./uploads', { recursive: true })
+    console.log('Created uploads directory: /uploads')
 }
 
 app.use(router)
