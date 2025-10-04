@@ -3,31 +3,19 @@ const cors = require('cors')
 require('dotenv').config();
 const router = require('./routers/index')
 const mongoose = require('mongoose')
+const fs = require('fs')
 
 const app = express()
 
 app.use(express.json())
-app.use('/uploads', express.static('uploads'))
+app.use('/files', express.static('workspace/uploads'))
+// app.use('/uploads', express.static('uploads'))
 app.use(cors())
 
-// let isConnected = false
-
-// async function connectToMongoDB() {
-//     try {
-//         await mongoose.connect(process.env.DATABASE_URL)
-//         isConnected = true
-//         console.log("Connect to MongoDB")
-//     } catch (err) {
-//         console.error('Error connecting to MongoDB', err)
-//     }
-// }
-
-// app.use((req, res, next) => {
-//     if (!isConnected) {
-//         connectToMongoDB()
-//     }
-//     next()
-// })
+if (!fs.existsSync('/workspace/uploads')) {
+    fs.mkdirSync('/workspace/uploads', { recursive: true })
+    console.log('Created uploads directory: /workspace/uploads')
+}
 
 app.use(router)
 
@@ -42,5 +30,3 @@ app.listen(process.env.PORT || 5000, async (err) => {
 
     console.log('Server OK')
 })
-
-// module.exports = app
