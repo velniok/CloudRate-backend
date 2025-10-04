@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+require('dotenv').config();
 
 const checkAdminMiddleware = (req, res, next) => {
     try {
@@ -6,7 +7,7 @@ const checkAdminMiddleware = (req, res, next) => {
         if (!token) {
             return res.status(401).json({ message: 'Не авторизован' })
         }
-        const decoded = jwt.verify(token, 'secret123')
+        const decoded = jwt.verify(token, process.env.TOKEN_SECRET_KEY)
         if (decoded.role !== 'admin') {
             return res.status(403).json({ message: 'Нет доступа' })
         }
