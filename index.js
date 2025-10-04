@@ -8,7 +8,7 @@ const fs = require('fs')
 const app = express()
 
 app.use(express.json())
-app.use('/workspace/uploads', express.static('/workspace/uploads'))
+app.use('/files', express.static('/workspace/uploads'))
 // app.use('/uploads', express.static('uploads'))
 app.use(cors())
 
