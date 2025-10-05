@@ -48,7 +48,21 @@ class ArtistController {
         try {
             const artistId = req.params.id
             const artist = await ArtistModel.findOne({ _id: artistId })
+
+            if (!artist) {
+                return res.status(404).json({
+                    message: 'Артист не найден'
+                })
+            }
+
             const artistTracks = await TrackModel.find({ _id: { $in: artist.tracks } })
+
+            if (!artistTracks) {
+                return res.status(404).json({
+                    message: 'Треки артиста не найдены'
+                })
+            }
+
             artist.tracks = artistTracks
             
             for (const artist of artistTracks) {
@@ -62,15 +76,11 @@ class ArtistController {
             }
 
             res.json(artist)
-
-            // if (!artist) {
-            //     return res.status(404).json({
-            //         message: 'Артист не найден'
-            //     })
-            // }
-            // res.json(trackArtists)
         } catch (err) {
             console.log(err)
+            res.status(500).json({
+                message: 'Не удалось получить ариста'
+            })
         }
     }
 
@@ -96,10 +106,19 @@ class ArtistController {
 
             const artist = await ArtistModel.findOne({ _id: artistId })
 
+            if (!artist) {
+                return res.status(404).json({
+                    message: 'Артист не найден'
+                })
+            }
+
             res.json(artist)
 
         } catch (err) {
             console.log(err)
+            res.status(500).json({
+                message: 'Не удалось обновить артиста',
+            })
         }
     }
 
@@ -114,7 +133,10 @@ class ArtistController {
             })
 
         } catch (err) {
-
+            console.log(err)
+            res.status(500).json({
+                message: 'Не удалось удалить артиста',
+            })
         }
     }
 }

@@ -1,6 +1,6 @@
 const Router = require('express').Router
 
-const UserController = require('../controllers/UserController')
+const AuthController = require('../controllers/AuthController')
 const ArtistController = require('../controllers/ArtistController')
 const TrackController = require('../controllers/TrackController')
 
@@ -10,14 +10,14 @@ const artistValidation = require('../validations/artist')
 const checkAuthMiddleware = require('../middleware/checkAuthMiddleware')
 const upload = require('../multer')
 const checkAdminMiddleware = require('../middleware/checkAdminMiddleware')
+const UserController = require('../controllers/UserController')
 
 const router = new Router()
 
-router.post('/auth/login', UserController.login)
-router.post('/auth/register', registerValidation, UserController.register)
-router.get('/auth/me', checkAuthMiddleware, UserController.authMe)
-router.get('/auth/:id', UserController.getUser)
-router.patch('/auth/:id', UserController.update)
+router.post('/auth/login', AuthController.login)
+router.post('/auth/register', registerValidation, AuthController.register)
+router.get('/auth/me', checkAuthMiddleware, AuthController.authMe)
+router.patch('/auth/:id', AuthController.update)
 
 router.post('/upload', upload.single('image'), (req, res) => {
     try {
@@ -28,6 +28,8 @@ router.post('/upload', upload.single('image'), (req, res) => {
         console.log(err)
     }
 })
+
+router.get('/user/:id', UserController.getUser)
 
 router.post('/artist', checkAdminMiddleware, artistValidation.artistCreateValidation, ArtistController.create)
 router.get('/artist', ArtistController.getAll)

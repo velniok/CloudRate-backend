@@ -1,6 +1,6 @@
 const TrackModel = require('../models/Track')
 const ArtistModel = require('../models/Artist')
-const ObjectId = require('mongoose').Types.ObjectId;
+const UserModel = require('../models/User')
 
 class TrackController {
     async create(req, res) {
@@ -45,6 +45,12 @@ class TrackController {
         try {
             const tracks = await TrackModel.find()
 
+            if (!tracks) {
+                return res.status(404).json({
+                    message: 'Не удалось найти треки',
+                })
+            }
+
             res.json(tracks)
         } catch (err) {
             console.log(err)
@@ -58,21 +64,29 @@ class TrackController {
         try {
             const trackId = req.params.id
             const track = await TrackModel.findOne({ _id: trackId })
+
+            if (!track) {
+                return res.status(404).json({
+                    message: 'Трек не найден'
+                })
+            }
+
             const trackArtists = []
 
             for (const artist of track.artist) {
                 const trackArtist = await ArtistModel.findOne({ _id: artist.artistId })
+
+                if (!trackArtist) {
+                    return res.status(404).json({
+                        message: 'Не удалось найти артиста',
+                    })
+                }
+
                 trackArtists.push(trackArtist)
             }
             
             track.artist = trackArtists
             res.json(track)
-
-            // if (!track) {
-            //     return res.status(404).json({
-            //         message: 'Трек не найден'
-            //     })
-            // }
         } catch (err) {
             console.log(err)
         }
@@ -82,11 +96,25 @@ class TrackController {
         try {
             const trackId = req.params.id
             const track = await TrackModel.findOne({ _idid: trackId })
+
+            if (!track) {
+                return res.status(404).json({
+                    message: 'Не удалось найти трек',
+                })
+            }
+
             const trackArtists = track.artist
             const artists = []
 
             trackArtists.map(async (e) => {
                 const artist = await ArtistModel.findOne({ _id: e.artistId })
+
+                if (!artist) {
+                    return res.status(404).json({
+                        message: 'Не удалось найти артиста',
+                    })
+                }
+
                 artists.push(artist)
                 if (artists.length === trackArtists.length) {
                     res.json(artists)
@@ -94,6 +122,9 @@ class TrackController {
             })
         } catch (err) {
             console.log(err)
+            res.status(404).json({
+                message: 'Не удалось получить трек',
+            })
         }
     }
 
@@ -104,10 +135,23 @@ class TrackController {
                 .limit(5)
                 .exec()
 
+            if (!tracks) {
+                return res.status(404).json({
+                    message: 'Не удалось найти треки',
+                })
+            }
+
             for (const track of tracks) {
                 const newArtist = []
                 for (const artist of track.artist) {
                     const trackArtist = await ArtistModel.findOne({ _id: artist.artistId })
+
+                    if (!trackArtist) {
+                        return res.status(404).json({
+                            message: 'Не удалось артиста трека',
+                        })
+                    }
+
                     newArtist.push(trackArtist)
                 }
                 track.artist = newArtist
@@ -116,15 +160,24 @@ class TrackController {
             res.json(tracks)
         } catch (err) {
             console.log(err)
+            res.status(500).json({
+                message: 'Не удалось получить треки',
+            })
         }
     }
 
     async update(req, res) {
         try {
             const trackId = req.params.id
+            const track = await TrackModel.findOne({ _id: trackId })
+
+            if (!track) {
+                return res.status(404).json({
+                    message: 'Не удалось найти треки',
+                })
+            }
 
                 if (req.body.ratingOverall && req.body.ratingCriteria) {
-                    const track = await TrackModel.findOne({ _id: trackId })
                     const ratingOverall = req.body.ratingOverall
                     const ratingCriteria = req.body.ratingCriteria
                     const ratingTrackData = JSON.parse(JSON.stringify(track.ratingTrack))
@@ -148,6 +201,25 @@ class TrackController {
                         criteria.avgRating = Math.round((newAvgRatingCriteria / criteria.rating.length) * 10) / 10
                     })
 
+                    const user = await UserModel.findOne({ _id: req.body.userId })
+
+                    if (!user) {
+                        return res.status(404).json({
+                            message: 'Пользователь не найден'
+                        })
+                    }
+
+                    const userRatingTracks = user.ratingTracks
+                    const newUserRatingTrack = {
+                        trackId: trackId,
+                        ratingOverall: req.body.ratingOverall,
+                        ratingCriteria: req.body.ratingCriteria,
+                    }
+
+                    await user.updateOne({
+                        ratingTracks: [...userRatingTracks, newUserRatingTrack]
+                    })
+
                     await track.updateOne({
                         ratingTrack: ratingTrackData
                     })
@@ -169,12 +241,13 @@ class TrackController {
                         },
                     )
 
-                    const track = await TrackModel.findOne({ _id: trackId })
-
                     res.json(track)
                 }
         } catch (err) {
             console.log(err)
+            res.status(500).json({
+                message: 'Не удалось обновить трек',
+            })
         }
     }
 
@@ -182,10 +255,24 @@ class TrackController {
         try {
             const trackId = req.params.id
             const track = await TrackModel.findOne({ _id: trackId })
+
+            if (!track) {
+                return res.status(404).json({
+                    message: 'Не удалось найти треки',
+                })
+            }
+
             const trackArtists = track.artist
             
             for (const trackArtist of trackArtists) {
                 const artist = await ArtistModel.findOne({ _id: trackArtist.artistId })
+
+                if (!artist) {
+                    return res.status(404).json({
+                        message: 'Не удалось найти артиста',
+                    })
+                }
+
                 const filteredArtistTracks = artist.tracks.filter(e => e.toString() !== trackId)
                 await ArtistModel.updateOne(
                     {
@@ -205,6 +292,9 @@ class TrackController {
 
         } catch (err) {
             console.log(err)
+            res.status(404).json({
+                message: 'Не удалось удалить трек',
+            })
         }
     }
 }

@@ -18,7 +18,10 @@ const mongoose = require("mongoose");
             type: String,
             required: true,
         },
-        avatarUrl: String,
+        avatarUrl: {
+            type: String,
+            default: null,
+        },
         ratingTracks: {
             type: Array,
             default: [],
