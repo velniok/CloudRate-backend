@@ -113,7 +113,7 @@ class TrackController {
     async getTopRating(req, res) {
         try {
             const tracks = await TrackModel.find()
-                .sort({ "ratingTrack.0.overall.rating": -1 })
+                .sort({ "ratingTrack.0.overall.rating.rating": -1 })
                 .limit(5)
                 .exec()
 
@@ -164,21 +164,30 @@ class TrackController {
                     const ratingCriteria = req.body.ratingCriteria
                     const ratingTrackData = JSON.parse(JSON.stringify(track.ratingTrack))
 
-                    ratingTrackData[0].overall.rating.push(ratingOverall)
+                    const newRatingOverall = {
+                        userId: req.body.userId,
+                        rating: req.body.ratingOverall
+                    }
+
+                    ratingTrackData[0].overall.rating.push(newRatingOverall)
 
                     let newAvgRatingOverall = 0
                     ratingTrackData[0].overall.rating.map(e => {
-                        newAvgRatingOverall += e
+                        newAvgRatingOverall += e.rating
                     })
                     ratingTrackData[0].overall.avgRating = Math.round(newAvgRatingOverall / ratingTrackData[0].overall.rating.length)
 
                     ratingCriteria.map((e, index) => {
                         const criteria = ratingTrackData[0].criteria.filter(obj => obj.id === index + 1)[0]
-                        criteria.rating.push(e)
+                        const newRatingCriteria = {
+                            userId: req.body.userId,
+                            rating: e
+                        }
+                        criteria.rating.push(newRatingCriteria)
 
                         let newAvgRatingCriteria = 0
                         criteria.rating.map(e => {
-                            newAvgRatingCriteria += e
+                            newAvgRatingCriteria += e.rating
                         })
                         criteria.avgRating = Math.round((newAvgRatingCriteria / criteria.rating.length) * 10) / 10
                     })
@@ -210,6 +219,8 @@ class TrackController {
                                 ratingCriteria,
                             },
                         }
+
+                        newUserRatingTrack.review = req.body.review
 
                         await track.updateOne({
                             reviews: [...trackReviews, newReviewObj]
@@ -280,6 +291,26 @@ class TrackController {
                     },
                     {
                         tracks: filteredArtistTracks
+                    }
+                )
+            }
+
+            const trackRating = track.ratingTrack[0].overall.rating
+
+            for (const rating of trackRating) {
+                const user = await UserModel.findOne({ _id: rating.userId })
+                    if (!user) {
+                        return res.status(404).json({
+                            message: 'Не удалось найти пользователя',
+                        })
+                    }
+                const filteredUserTracks = user.ratingTracks.filter(e => e.trackId.toString() !== trackId)
+                await UserModel.updateOne(
+                    {
+                        _id: rating.userId
+                    },
+                    {
+                        ratingTracks: filteredUserTracks
                     }
                 )
             }
