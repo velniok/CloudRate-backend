@@ -51,6 +51,10 @@ const TrackSchema = new mongoose.Schema({
             ]
         }],
     },
+    reviews: {
+        type: Array,
+        default: [],
+    },
     avatarUrl: String,
     }, {
         timestamps: true,

@@ -86,45 +86,27 @@ class TrackController {
             }
             
             track.artist = trackArtists
-            res.json(track)
-        } catch (err) {
-            console.log(err)
-        }
-    }
 
-    async getArtists(req, res) {
-        try {
-            const trackId = req.params.id
-            const track = await TrackModel.findOne({ _idid: trackId })
+            for (const review of track.reviews) {
+                const reviewUser = await UserModel.findOne({ _id: review.userId })
 
-            if (!track) {
-                return res.status(404).json({
-                    message: 'Не удалось найти трек',
-                })
-            }
-
-            const trackArtists = track.artist
-            const artists = []
-
-            trackArtists.map(async (e) => {
-                const artist = await ArtistModel.findOne({ _id: e.artistId })
-
-                if (!artist) {
+                if (!reviewUser) {
                     return res.status(404).json({
-                        message: 'Не удалось найти артиста',
+                        message: 'Не удалось найти пользователя',
                     })
                 }
 
-                artists.push(artist)
-                if (artists.length === trackArtists.length) {
-                    res.json(artists)
+                const newReviewUser = {
+                    nickname: reviewUser.nickname,
+                    avatarUrl: reviewUser.avatarUrl
                 }
-            })
+
+                review.reviewUser = newReviewUser
+            }
+
+            res.json(track)
         } catch (err) {
             console.log(err)
-            res.status(404).json({
-                message: 'Не удалось получить трек',
-            })
         }
     }
 
@@ -214,6 +196,24 @@ class TrackController {
                         trackId: trackId,
                         ratingOverall: req.body.ratingOverall,
                         ratingCriteria: req.body.ratingCriteria,
+                    }
+
+                    if (req.body.review && req.body.review !== '') {
+                        const review = req.body.review
+                        const trackReviews = track.reviews
+
+                        const newReviewObj = {
+                            userId: req.body.userId,
+                            review: review,
+                            rating: {
+                                ratingOverall,
+                                ratingCriteria,
+                            },
+                        }
+
+                        await track.updateOne({
+                            reviews: [...trackReviews, newReviewObj]
+                        })
                     }
 
                     await user.updateOne({
