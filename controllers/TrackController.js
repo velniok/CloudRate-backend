@@ -114,7 +114,7 @@ class TrackController {
         try {
             const tracks = await TrackModel.find()
                 .sort({ "ratingTrack.0.overall.rating.rating": -1 })
-                .limit(5)
+                .limit(13)
                 .exec()
 
             if (!tracks) {
