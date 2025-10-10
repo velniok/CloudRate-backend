@@ -41,6 +41,7 @@ router.post('/track', checkAdminMiddleware, TrackController.create)
 router.get('/track', TrackController.getAll)
 router.get('/track/:id', TrackController.getOne)
 router.get('/top-rating-tracks', TrackController.getTopRating)
+router.get('/latest-comment', TrackController.getLatestComment)
 router.patch('/track/:id', TrackController.update)
 router.delete('/track/:id', checkAdminMiddleware, TrackController.remove)
 

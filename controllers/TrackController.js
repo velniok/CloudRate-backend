@@ -148,6 +148,62 @@ class TrackController {
         }
     }
 
+    async getLatestComment(req, res) {
+         try {
+            const reviews = await TrackModel.aggregate([
+                { $unwind: "$reviews" },
+                {
+                    $replaceRoot: {
+                    newRoot: {
+                        $mergeObjects: [
+                        "$reviews",
+                        {
+                            track: {
+                                trackId: "$_id",
+                                name: "$name",
+                                avatarUrl: "$avatarUrl",
+                                artist: "$artist",
+                            }
+                        }
+                        ]
+                    }
+                    }
+                },
+                { $sort: { createdAt: -1 } },
+                { $limit: 3 }
+            ])
+
+            if (!reviews) {
+                return res.status(404).json({
+                    message: 'Не удалось найти обзор',
+                })
+            }
+
+            for (const review of reviews) {
+                const user = await UserModel.findOne({ _id: review.userId })
+
+                if (!user) {
+                    return res.status(404).json({
+                        message: 'Не удалось найти пользователя',
+                    })
+                }
+
+                review.user = {
+                    id: user._id,
+                    nickname: user.nickname,
+                    avatarUrl: user.avatarUrl,
+                }
+            }
+
+            res.json(reviews)
+        } catch (err) {
+            console.log(err)
+            res.status(500).json({
+                message: 'Не удалось получить обзоры',
+            })
+        }
+    }
+
     async update(req, res) {
         try {
             const trackId = req.params.id
@@ -218,6 +274,7 @@ class TrackController {
                                 ratingOverall,
                                 ratingCriteria,
                             },
+                            createdAt: new Date()
                         }
 
                         newUserRatingTrack.review = req.body.review
