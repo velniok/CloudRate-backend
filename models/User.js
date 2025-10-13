@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
             type: String,
             default: 'user'
         },
-        nickname: {
+        name: {
             type: String,
             required: true,
         },

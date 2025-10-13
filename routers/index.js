@@ -11,6 +11,7 @@ const checkAuthMiddleware = require('../middleware/checkAuthMiddleware')
 const upload = require('../multer')
 const checkAdminMiddleware = require('../middleware/checkAdminMiddleware')
 const UserController = require('../controllers/UserController')
+const SearchController = require('../controllers/SearchController')
 
 const router = new Router()
 
@@ -45,5 +46,6 @@ router.get('/latest-comment', TrackController.getLatestComment)
 router.patch('/track/:id', TrackController.update)
 router.delete('/track/:id', checkAdminMiddleware, TrackController.remove)
 
+router.post('/search/:filter', SearchController.search)
 
 module.exports = router

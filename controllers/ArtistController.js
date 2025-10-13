@@ -1,7 +1,6 @@
 const { validationResult } = require("express-validator")
 const ArtistModel = require('../models/Artist')
 const TrackModel = require('../models/Track')
-const { Op } = require("sequelize")
 
 class ArtistController {
     async create(req, res) {
