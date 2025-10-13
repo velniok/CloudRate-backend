@@ -31,6 +31,7 @@ router.post('/upload', upload.single('image'), (req, res) => {
 })
 
 router.get('/user/:id', UserController.getUser)
+router.patch('/user/:id', UserController.update)
 
 router.post('/artist', checkAdminMiddleware, artistValidation.artistCreateValidation, ArtistController.create)
 router.get('/artist', ArtistController.getAll)

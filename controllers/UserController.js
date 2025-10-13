@@ -38,6 +38,36 @@ class UserController {
             })
         }
     }
+
+    async update(req, res) {
+        try {
+            const userId = req.params.id
+            
+            await UserModel.updateOne(
+                {
+                    _id: userId,
+                },
+                {
+                    name: req.body.name,
+                    avatarUrl: req.body.avatarUrl,
+                },
+            )
+            
+            const user = await UserModel.findOne({ _id: userId })
+            
+            if (!user) {
+                return res.status(404).json({
+                    message: 'Пользователь не найден'
+                })
+            }
+            
+            res.json(user)
+        } catch (err) {
+            res.status(500).json({
+                message: 'Не удалось обновить пользователя'
+            })
+        }
+    }
 }
 
 module.exports = new UserController()
