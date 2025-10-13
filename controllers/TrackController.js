@@ -97,7 +97,7 @@ class TrackController {
                 }
 
                 const newReviewUser = {
-                    nickname: reviewUser.nickname,
+                    name: reviewUser.name,
                     avatarUrl: reviewUser.avatarUrl
                 }
 
@@ -190,7 +190,7 @@ class TrackController {
 
                 review.user = {
                     id: user._id,
-                    nickname: user.nickname,
+                    name: user.name,
                     avatarUrl: user.avatarUrl,
                 }
             }
