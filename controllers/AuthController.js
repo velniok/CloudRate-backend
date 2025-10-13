@@ -85,17 +85,6 @@ class AuthController {
         }
     }
 
-    async update(req, res) {
-        try {
-
-        } catch (err) {
-            console.log(err)
-            res.status(500).json({
-                message: 'Не удалось обновить пользователя'
-            })
-        }
-    }
-
     async authMe(req, res) {
         try {
             const user = await UserModel.findOne({ _id: req.userId })

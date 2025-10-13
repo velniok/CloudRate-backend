@@ -12,13 +12,13 @@ const upload = require('../multer')
 const checkAdminMiddleware = require('../middleware/checkAdminMiddleware')
 const UserController = require('../controllers/UserController')
 const SearchController = require('../controllers/SearchController')
+const checkUserMiddleware = require('../middleware/checkUserMiddleware')
 
 const router = new Router()
 
 router.post('/auth/login', AuthController.login)
 router.post('/auth/register', registerValidation, AuthController.register)
 router.get('/auth/me', checkAuthMiddleware, AuthController.authMe)
-router.patch('/auth/:id', AuthController.update)
 
 router.post('/upload', upload.single('image'), (req, res) => {
     try {
@@ -31,7 +31,7 @@ router.post('/upload', upload.single('image'), (req, res) => {
 })
 
 router.get('/user/:id', UserController.getUser)
-router.patch('/user/:id', UserController.update)
+router.patch('/user/:id', checkUserMiddleware, UserController.update)
 
 router.post('/artist', checkAdminMiddleware, artistValidation.artistCreateValidation, ArtistController.create)
 router.get('/artist', ArtistController.getAll)
@@ -42,10 +42,11 @@ router.delete('/artist/:id', checkAdminMiddleware, ArtistController.remove)
 router.post('/track', checkAdminMiddleware, TrackController.create)
 router.get('/track', TrackController.getAll)
 router.get('/track/:id', TrackController.getOne)
-router.get('/top-rating-tracks', TrackController.getTopRating)
-router.get('/latest-comment', TrackController.getLatestComment)
 router.patch('/track/:id', TrackController.update)
 router.delete('/track/:id', checkAdminMiddleware, TrackController.remove)
+
+router.get('/top-rating-tracks', TrackController.getTopRating)
+router.get('/latest-comment', TrackController.getLatestComment)
 
 router.post('/search/:filter', SearchController.search)
 
