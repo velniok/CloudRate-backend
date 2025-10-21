@@ -23,7 +23,7 @@ router.get('/auth/me', checkAuthMiddleware, AuthController.authMe)
 router.post('/upload', upload.single('image'), (req, res) => {
     try {
         res.json({
-            url: `/files/${req.file.originalname}`
+            url: `/files/${req.file.filename}`
         })
     } catch (err) {
         console.log(err)

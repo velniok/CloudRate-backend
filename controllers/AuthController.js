@@ -18,7 +18,7 @@ class AuthController {
 
             const doc = new UserModel({
                 email: req.body.email,
-                nickname: req.body.nickname,
+                name: req.body.name,
                 avatarUrl: req.body.avatarUrl,
                 passwordHash,
             })

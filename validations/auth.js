@@ -5,7 +5,7 @@ const registerValidation = [
     body('password')
         .isLength({ min: 6 })
         .withMessage("Пароль должен быть минимум 6 символов"),
-    body('nickname')
+    body('name')
         .isLength({ min: 3 })
         .withMessage("Никнейм должен быть минимум 3 символа")
 ]
