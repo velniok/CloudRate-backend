@@ -43,7 +43,11 @@ class TrackController {
 
     async getAll(req, res) {
         try {
+            const page = Number(req.query.page) || 1
             const tracks = await TrackModel.find()
+                .skip((page - 1) * 5)
+                .limit(5)
+                .sort({ createdAt: 1 })
 
             if (!tracks) {
                 return res.status(404).json({
@@ -51,7 +55,30 @@ class TrackController {
                 })
             }
 
-            res.json(tracks)
+            for (const track of tracks) {
+                const artists = track.artist
+                for (let i = 0; i < artists.length; i++ ) {
+                    const artist = await ArtistModel.findOne({ _id: artists[i].artistId })
+                    artists[i] = {
+                        _id: artist._id,
+                        name: artist.name,
+                        avatarUrl: artist.avatarUrl,
+                    }
+                }
+            }
+
+            const trackNext = await TrackModel.find()
+                .skip(page * 5)
+                .limit(1)
+                .sort({ createdAt: 1 })
+
+            let nextPage = true
+
+            if (trackNext.length === 0) {
+                nextPage = false
+            }
+
+            res.json({tracks, nextPage, page})
         } catch (err) {
             console.log(err)
             res.status(500).json({

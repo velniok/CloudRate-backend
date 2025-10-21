@@ -32,9 +32,36 @@ class ArtistController {
 
     async getAll(req, res) {
         try {
+            const page = Number(req.query.page) || 1
             const artists = await ArtistModel.find()
+                .skip((page - 1) * 5)
+                .limit(5)
+                .sort({ createdAt: 1 })
 
-            res.json(artists)
+            for (const artist of artists) {
+                const tracks = artist.tracks
+                for (let i = 0; i < tracks.length; i++ ) {
+                    const track = await TrackModel.findOne({ _id: tracks[i] })
+                    tracks[i] = {
+                        _id: track._id,
+                        name: track.name,
+                        avatarUrl: track.avatarUrl,
+                    }
+                }
+            }
+
+            const artistNext = await ArtistModel.find()
+                .skip(page * 5)
+                .limit(1)
+                .sort({ createdAt: 1 })
+
+            let nextPage = true
+
+            if (artistNext.length === 0) {
+                nextPage = false
+            }
+
+            res.json({artists, nextPage, page})
         } catch (err) {
             console.log(err)
             res.status(500).json({
